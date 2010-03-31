@@ -14,30 +14,12 @@ typedef struct
     
 } sub;
 
-/*void standard(int dim,int a[dim][dim], int b[dim][dim], int c[dim][dim]);
-void strassen(int dim, int a[dim][dim],int b[dim][dim], int c[dim][dim], int cross);
-void printmat(int dim, int a[dim][dim]);
-int rbyc(int dim, int a[dim][dim],int b[dim][dim], int i, int j);
-void matadd(int dim, int a [dim][dim], int b[dim][dim], int c[dim][dim], int x);
-void copypart(int dim1, int dim2, int x, int y, int a[dim1][dim1], int b[dim2][dim2]);
-*/
-/*
-void standard(int dim, int ** a, int ** b, int ** c);
-void strassen(int dim, int ** x, int ** y, int ** z, int cross);
-void printmat(int dim, int ** a);
-int rbyc(int dim, int ** a,int ** b, int i, int j);
-void matadd(int dim, int ** a, int ** b, int ** c, int x);
-void copypart(int dim1, int dim2, int x, int y, int a[dim1][dim1], int b[dim2][dim2]);
-*/
 sub standard(sub a, sub b);
 sub strassen(sub x, sub y, int cross);
 sub compose(sub tl, sub tr, sub bl, sub br);
 void printmat(sub a);
 int rbyc(sub a, sub b, int i, int j);
 sub matadd(sub a, sub b, int x);
-
-
-
 
 
 int main(int argc, char * argv[])
@@ -139,7 +121,8 @@ strassen(sub x, sub y, int cross)
  
     if(dim < cross)
         {
-    //    printf("%d ", dim);
+  //      printf("stand \n ");
+       // printmat(standard(x,y));
         return standard(x,y);
         }
     
@@ -171,15 +154,21 @@ strassen(sub x, sub y, int cross)
     sub bl = matadd(p3, p4, 1);
     sub br = matadd(matadd(p5, p1, 1), matadd(p3, p7, 1), -1);
     
-    printmat(p1);
-    /*printmat(b);
-    printmat(matadd(a,b,1));
-    printmat(d);
-    printf("mat 2\n");
-    printmat(e);
-    printmat(f);
-    printmat(g);
-    printmat(h);*/
+ //   printmat(p1);
+   // printf("x\n");
+//    printmat(p2);
+ //   printmat(p3);
+   // printf("y\n");
+  //  printmat(p4);
+//    printmat(p5);
+ //   printf("mat 2\n");
+  //  printmat(p6);
+  //  printmat(p7);
+//    printmat(g);
+//    printmat(e);
+//    printmat(d);
+//    printmat(standard(d,matadd(g,e,-1)));
+//    printmat(h);*/
 
     return compose(tl, tr, bl, br);
    // return a;
@@ -274,7 +263,7 @@ rbyc(sub a, sub b, int i, int j)
     int sum = 0;
     for(int k = 0; k < a.dim; k++)
     {
-        sum += a.mat[i][k] * b.mat[k][j]; 
+        sum += a.mat[i+ a.r][k+a.c] * b.mat[k+b.r][j+b.c]; 
     }
     return sum;
 }
