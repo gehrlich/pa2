@@ -4,13 +4,14 @@
 typedef struct
 {
     // Super matrix
-    int ** mat;
+    int * mat;
     
     // Row and col of top left corner of matrix
     int r;
     int c;
     
     int dim;
+    int full;
     
 } sub;
 
@@ -42,9 +43,9 @@ int main(int argc, char * argv[])
         return 2;
     }
 
-    int ** mat1 = malloc(dim * sizeof(int *));
-    int ** mat2 = malloc(dim * sizeof(int *));
-    int ** result = malloc(dim * sizeof(int *));
+    int * mat1 = malloc(dim * dim * sizeof(int));
+    int * mat2 = malloc(dim * dim * sizeof(int));
+    int * result = malloc(dim * dim * sizeof(int));
 
     if (mat1 == NULL || mat2 == NULL || result == NULL)
     {
@@ -52,7 +53,7 @@ int main(int argc, char * argv[])
         return 3;
     }
     
-    for (int i = 0; i < dim; i++)
+/*    for (int i = 0; i < dim; i++)
     {
         mat1[i] = malloc(dim * sizeof(int));
         mat2[i] = malloc(dim * sizeof(int));
@@ -64,40 +65,37 @@ int main(int argc, char * argv[])
             return 3;
         }
     }
-
+*/
 //    int mat1 [dim][dim];
     for(int i = 0; i < dim; i++)
     {
-        for(int j = 0; j<dim; j++)
+        for(int j = 0; j < dim; j++)
         {
-           fscanf(inptr, "%d\n", &mat1[i][j]);
+           fscanf(inptr, "%d\n", &mat1[i * dim + j]);
         }
     }
 //    int mat2 [dim][dim];
     for(int i = 0; i < dim; i++)
     {
-        for(int j = 0; j<dim; j++)
+        for(int j = 0; j < dim; j++)
         {
-            fscanf(inptr, "%d\n", &mat2[i][j]);
+            fscanf(inptr, "%d\n", &mat2[i * dim + j]);
         } 
     }
 //    int test [dim][dim];
     
-    sub a = {mat1, 0, 0, dim};
-    sub b = {mat2, 0, 0, dim};
+    sub a = {mat1, 0, 0, dim, dim};
+    sub b = {mat2, 0, 0, dim, dim};
     
     printmat(a);
     printmat(b);
-
-//    printmat(result);
     
     sub res = strassen(a, b, 3);
     printmat(res);
     sub res2 = standard (a, b);
     printmat(res2);
 
-
-    for (int i = 0; i < dim; i++)
+/*    for (int i = 0; i < dim; i++)
     {
         free(mat1[i]);
         free(mat2[i]);
@@ -108,6 +106,7 @@ int main(int argc, char * argv[])
     free(mat2);
     free(result);
     fclose(inptr);
+*/
 }
 
 
@@ -120,27 +119,23 @@ strassen(sub x, sub y, int cross)
   //  printf("%d ", dim);
  
     if(dim < cross)
-        {
-  //      printf("stand \n ");
-       // printmat(standard(x,y));
         return standard(x,y);
-        }
     
     //idea optimize by not allocating any memeory here.  just pass in a start
     //val and an end val and do additions in place
     
     //even only version:
     //lots of memory allocation CUT DOWN!
-    sub a = {x.mat, 0, 0, dim / 2};
-    sub b = {x.mat, 0, dim / 2, dim / 2};
-    sub c = {x.mat, dim / 2, 0, dim / 2};
-    sub d = {x.mat, dim / 2, dim / 2, dim / 2};
-    sub e = {y.mat, 0, 0, dim / 2};
-    sub f = {y.mat, 0, dim / 2, dim / 2};
-    sub g = {y.mat, dim / 2, 0, dim / 2};
-    sub h = {y.mat, dim / 2, dim / 2, dim / 2};
+    sub a = {x.mat, 0, 0, dim / 2, dim};
+    sub b = {x.mat, 0, dim / 2, dim / 2, dim};
+    sub c = {x.mat, dim / 2, 0, dim / 2, dim};
+    sub d = {x.mat, dim / 2, dim / 2, dim / 2, dim};
+    sub e = {y.mat, 0, 0, dim / 2, dim};
+    sub f = {y.mat, 0, dim / 2, dim / 2, dim};
+    sub g = {y.mat, dim / 2, 0, dim / 2, dim};
+    sub h = {y.mat, dim / 2, dim / 2, dim / 2, dim};
     
-   
+    
     sub p1 = strassen(a, matadd(f, h, -1), cross);
     sub p2 = strassen(matadd(a, b, 1), h, cross);
     sub p3 = strassen(matadd(c, d, 1), e, cross);
@@ -169,8 +164,12 @@ strassen(sub x, sub y, int cross)
 //    printmat(d);
 //    printmat(standard(d,matadd(g,e,-1)));
 //    printmat(h);*/
-
-    return compose(tl, tr, bl, br);
+/*
+    printmat(p1);
+    printmat(p2);
+    printmat(p3);
+    printmat(p4);
+*/    return compose(tl, tr, bl, br);
    // return a;
     
 }
@@ -184,7 +183,7 @@ compose(sub tl, sub tr, sub bl, sub br)
 {
     // Initialize the result array on the heap
     int dim = tl.dim + bl.dim;
-    int ** result = malloc(dim * sizeof(int *));
+    int * result = malloc(dim * dim * sizeof(int));
 
     if (result == NULL)
     {
@@ -192,7 +191,7 @@ compose(sub tl, sub tr, sub bl, sub br)
         //return 3;
     }
     
-    for (int i = 0; i < dim; i++)
+/*    for (int i = 0; i < dim; i++)
     {
         result[i] = malloc(dim * sizeof(int));
         
@@ -202,20 +201,25 @@ compose(sub tl, sub tr, sub bl, sub br)
             //return 3;
         }
     }
-    
+*/    
     // Compose four submatrices
+    
     for (int i = 0; i < tl.dim; i++)
    {
         for (int j = 0; j < tl.dim; j++)
         {
-            result[i][j]                   = tl.mat[i + tl.r][j + tl.c];
-            result[i + tl.dim][j]          = bl.mat[i + bl.r][j + bl.c];
-            result[i][j + tl.dim]          = tr.mat[i + tr.r][j + tr.c];
-            result[i + tl.dim][j + tl.dim] = br.mat[i + br.r][j + tr.c];
+            result[i * dim + j]         
+                    = tl.mat[(i + tl.r) * tl.full + (j + tl.c)];
+            result[(i + tl.dim) * dim + j]
+                    = bl.mat[(i + bl.r) * bl.full + (j + bl.c)];
+            result[i * dim + (j + tl.dim)]          
+                    = tr.mat[(i + tr.r) * tr.full + (j + tr.c)];
+            result[(i + tl.dim) * dim + (j + tl.dim)] 
+                    = br.mat[(i + br.r) * br.full + (j + tr.c)];
         }
     }
     
-    sub z = {result, 0, 0, dim};
+    sub z = {result, 0, 0, dim, dim};
     return z;
     
 }
@@ -229,8 +233,13 @@ sub
 standard(sub a, sub b)
 {
     int dim = a.dim;
-    int ** c = malloc(dim * sizeof(int *));
-    for (int i = 0; i < dim; i++)
+    int * c = malloc(dim * dim * sizeof(int));
+    if (c == NULL)
+    {
+        printf("Memory allocation failed.\n");
+        //return 3;
+    }
+/*    for (int i = 0; i < dim; i++)
     {
         c[i] = malloc(dim * sizeof(int));
         
@@ -240,16 +249,17 @@ standard(sub a, sub b)
            // return 3;
         }
     }
-
-    
+*/
     for(int i = 0; i < a.dim; i++)
     {
-        for(int j = 0; j< a.dim; j++)
+        for(int j = 0; j < a.dim; j++)
         {
-          c[i][j] = rbyc(a, b, i, j); 
+          c[i * dim + j] = rbyc(a, b, i, j); 
         }
     }
-    sub res = {c,0,0,a.dim};
+    
+    sub res = {c, 0, 0, a.dim, a.dim};
+    
     return res;
 }
 
@@ -263,8 +273,10 @@ rbyc(sub a, sub b, int i, int j)
     int sum = 0;
     for(int k = 0; k < a.dim; k++)
     {
-        sum += a.mat[i+ a.r][k+a.c] * b.mat[k+b.r][j+b.c]; 
+        sum += a.mat[(i + a.r) * a.full + (k + a.c)] * 
+               b.mat[(k + b.r) * b.full + (j + b.c)]; 
     }
+    
     return sum;
 }
 
@@ -274,18 +286,16 @@ rbyc(sub a, sub b, int i, int j)
 void 
 printmat(sub a)
 {
-    int r =a.r;
-    int c =a.c;
     for(int i = 0; i < a.dim; i++)
     {
-        for(int j = 0; j< a.dim; j++)
+        for(int j = 0; j < a.dim; j++)
         {
-          printf("%d.",a.mat[i+r][j+c]); 
+          printf("%3d ", a.mat[(i + a.r) * a.full + (j + a.c)]); 
         }
         printf("\n");
     }
     printf("\n");
-
+    
 }
 
 /*
@@ -296,15 +306,14 @@ matadd(sub a, sub b, int sign)
 {
     // Initialize the result array on the heap
     int dim = a.dim;
-    int ** result = malloc(dim * sizeof(int *));
+    int * result = malloc(dim * dim * sizeof(int));
 
     if (result == NULL)
     {
         printf("Memory allocation failed.\n");
-//        return 3;
     }
     
-    for (int i = 0; i < dim; i++)
+/*    for (int i = 0; i < dim; i++)
     {
         result[i] = malloc(dim * sizeof(int));
         
@@ -314,24 +323,23 @@ matadd(sub a, sub b, int sign)
 //            return 3;
         }
     }
-    
-    int ar =a.r;
-    int ac =a.c;
-    int br = b.r;
-    int bc = b.c;
+*/    
+
     // Perform the computation
     for(int i = 0; i < dim; i++)
     {
         for(int j = 0; j < dim; j++)
         {
             if(sign > 0)
-                result[i][j] = a.mat[i+ar][j+ac] + b.mat[i+br][j+bc];
+                result[i * dim + j] = a.mat[(i + a.r) * a.full + (j + a.c)] + 
+                                      b.mat[(i + b.r) * b.full + (j + b.c)];
             else
-                result[i][j] = a.mat[i+ar][j+ac] - b.mat[i+br][j+bc];
+                result[i * dim + j] = a.mat[(i + a.r) * a.full + (j + a.c)] -
+                                      b.mat[(i + b.r) * b.full + (j + b.c)];
         }
     }
     
-    sub z = {result, 0, 0, a.dim};
+    sub z = {result, 0, 0, dim, dim};
     return z;
 
 }
